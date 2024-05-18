@@ -1,14 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My LIFF App</title>
-</head>
-<body>
-    <h1>Welcome to My LIFF App</h1>
-    <button id="liff-login">Login with LINE</button>
-    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>
+window.onload = function() {
+    const useNodeJS = false; // if you are using Node.js server
+    const defaultLiffId = "2005169635-qZGKOGL4"; // replace with your LIFF ID
+
+    let myLiffId = "";
+
+    if (useNodeJS) {
+        fetch('/send-id')
+            .then(function(reqResponse) {
+                return reqResponse.json();
+            })
+            .then(function(jsonResponse) {
+                myLiffId = jsonResponse.id;
+                initializeLiffOrDie(myLiffId);
+            })
+            .catch(function(error) {
+                console.log(error);
+            });
+    } else {
+        myLiffId = defaultLiffId;
+        initializeLiffOrDie(myLiffId);
+    }
+};
+
+function initializeLiffOrDie(myLiffId) {
+    if (!myLiffId) {
+        console.log('LIFF ID not found');
+    } else {
+        initializeLiff(myLiffId);
+    }
+}
+
+function initializeLiff(myLiffId) {
+    liff.init({
+        liffId: myLiffId
+    })
+    .then(() => {
+        // Start to use LIFF's API
+        document.getElementById('liff-login').addEventListener('click', () => {
+            if (!liff.isLoggedIn()) {
+                liff.login();
+            } else {
+                alert('You are already logged in.');
+            }
+        });
+    })
+    .catch((err) => {
+        console.log('LIFF Initialization failed ', err);
+    });
+}
